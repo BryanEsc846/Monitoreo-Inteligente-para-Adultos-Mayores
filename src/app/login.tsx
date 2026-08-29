@@ -11,7 +11,7 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     // Al iniciar sesión, mandamos al usuario a la pantalla principal
-    router.replace('/MenuPrincipal' as any);
+    router.replace('/(tabs)' as any);
   };
 
   return (
