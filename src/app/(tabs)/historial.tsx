@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ColoresTema } from '../../constants/ColoresTema';
 import { GraficaBarras } from '../../components/GraficaBarras';
-import { historialSemanal, estadisticas, actividadDiaria } from '../../data/mockData';
+import { historialSemanal, estadisticas } from '../../data/mockData';
 
 export default function HistorialScreen() {
   const [periodo, setPeriodo] = useState('Semana');
@@ -50,30 +50,7 @@ export default function HistorialScreen() {
           </View>
         </View>
 
-        <View style={styles.timelineCard}>
-          <Text style={styles.timelineTitle}>Actividad del Día</Text>
-          <View style={styles.timelineContainer}>
-            {actividadDiaria.map((actividad, index) => {
-              const dotColor = 
-                actividad.tipo === 'success' ? ColoresTema.success :
-                actividad.tipo === 'warning' ? ColoresTema.warning :
-                ColoresTema.primary;
-                
-              return (
-                <View key={actividad.id} style={styles.timelineItem}>
-                  <View style={styles.timelineLeft}>
-                    <View style={[styles.timelineDot, { backgroundColor: dotColor }]} />
-                    {index < actividadDiaria.length - 1 && <View style={styles.timelineLine} />}
-                  </View>
-                  <View style={styles.timelineContent}>
-                    <Text style={styles.timelineTime}>{actividad.hora}</Text>
-                    <Text style={styles.timelineDesc}>{actividad.descripcion}</Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        </View>
+
 
         <TouchableOpacity style={styles.downloadButton}>
           <Ionicons name="download-outline" size={20} color={ColoresTema.primary} />
