@@ -34,15 +34,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="medicamentos"
-        options={{
-          title: 'Medicinas',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="medical" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="historial"
         options={{
           title: 'Historial',
@@ -57,15 +48,6 @@ export default function TabsLayout() {
           title: 'Alertas',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="perfil"
-        options={{
-          title: 'Perfil',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
           ),
         }}
       />
