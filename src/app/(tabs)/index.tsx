@@ -50,13 +50,6 @@ export default function HomeScreen() {
               <Text style={styles.actionLabel}>Ubicar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/(tabs)/medicamentos')}>
-              <View style={[styles.iconCircle, { backgroundColor: '#F5F3FF' }]}>
-                <Ionicons name="medical" size={24} color={ColoresTema.medicine || '#8B5CF6'} />
-              </View>
-              <Text style={styles.actionLabel}>Medicinas</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/(tabs)/historial')}>
               <View style={[styles.iconCircle, { backgroundColor: '#FEF3C7' }]}>
                 <Ionicons name="document-text" size={24} color={ColoresTema.warning} />
@@ -65,13 +58,6 @@ export default function HomeScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionCard} onPress={() => {}}>
-              <View style={[styles.iconCircle, { backgroundColor: '#FCE7F3' }]}>
-                <Ionicons name="people" size={24} color="#EC4899" />
-              </View>
-              <Text style={styles.actionLabel}>Contactos</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/(tabs)/perfil')}>
               <View style={[styles.iconCircle, { backgroundColor: '#F3F4F6' }]}>
                 <Ionicons name="settings" size={24} color={ColoresTema.textDark} />
               </View>
@@ -154,7 +140,7 @@ const styles = StyleSheet.create({
     backgroundColor: ColoresTema.cardBackground,
     borderRadius: 16,
     padding: 12,
-    width: '31%',
+    width: '48%',
     alignItems: 'center',
     marginBottom: 12,
     shadowColor: '#000',
