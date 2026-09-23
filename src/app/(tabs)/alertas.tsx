@@ -1,12 +1,47 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ColoresTema } from '../../constants/ColoresTema';
 import { TarjetaAlertaItem } from '../../components/TarjetaAlertaItem';
-import { alertas } from '../../data/mockData';
+import { apiGetAlertas, apiResolverAlerta, AlertaItem } from '../../services/api';
 
 export default function AlertasScreen() {
+  const [alertas, setAlertas] = useState<AlertaItem[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const cargarAlertas = useCallback(async () => {
+    try {
+      const data = await apiGetAlertas(1);
+      setAlertas(data);
+    } catch (error) {
+      console.log('Error cargando alertas:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    cargarAlertas();
+    // Polling cada 5 segundos para detectar nuevas alertas rápidamente
+    const interval = setInterval(cargarAlertas, 5000);
+    return () => clearInterval(interval);
+  }, [cargarAlertas]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await cargarAlertas();
+    setRefreshing(false);
+  }, [cargarAlertas]);
+
+  const handleResolver = async (alertaId: number) => {
+    try {
+      await apiResolverAlerta(alertaId);
+      Alert.alert('Alerta resuelta', 'La alerta ha sido marcada como atendida.');
+      await cargarAlertas();
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo resolver la alerta.');
+    }
+  };
+
   const alertasResueltas = alertas.filter(a => a.resuelta).length;
   const alertasTotales = alertas.length;
 
@@ -23,17 +58,39 @@ export default function AlertasScreen() {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[ColoresTema.primary]} />
+        }
+      >
         {alertasTotales > 0 ? (
           alertas.map(alerta => (
-            <TarjetaAlertaItem 
-              key={alerta.id} 
-              tipo={alerta.tipo}
-              titulo={alerta.titulo}
-              descripcion={alerta.descripcion}
-              fecha={alerta.fecha}
-              resuelta={alerta.resuelta}
-            />
+            <TouchableOpacity
+              key={alerta.id}
+              onLongPress={() => {
+                if (!alerta.resuelta) {
+                  Alert.alert(
+                    'Resolver Alerta',
+                    `¿Marcar "${alerta.titulo}" como resuelta?`,
+                    [
+                      { text: 'Cancelar', style: 'cancel' },
+                      { text: 'Resolver', onPress: () => handleResolver(alerta.id) },
+                    ]
+                  );
+                }
+              }}
+              activeOpacity={0.8}
+            >
+              <TarjetaAlertaItem 
+                tipo={alerta.tipo}
+                titulo={alerta.titulo}
+                descripcion={alerta.descripcion}
+                fecha={alerta.fecha}
+                resuelta={alerta.resuelta}
+              />
+            </TouchableOpacity>
           ))
         ) : (
           <View style={styles.emptyState}>

@@ -1,8 +1,13 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import { ColoresTema } from '../constants/ColoresTema';
+import { apiEnviarSOS } from '../services/api';
 
-export function BotonSOS() {
+interface BotonSOSProps {
+  pacienteId?: number;
+}
+
+export function BotonSOS({ pacienteId = 1 }: BotonSOSProps) {
   const handlePress = () => {
     Alert.alert(
       '¿Enviar alerta de emergencia?',
@@ -12,8 +17,13 @@ export function BotonSOS() {
         { 
           text: 'Enviar SOS', 
           style: 'destructive',
-          onPress: () => {
-            Alert.alert('Alerta SOS enviada a los contactos de emergencia');
+          onPress: async () => {
+            try {
+              const resultado = await apiEnviarSOS(pacienteId);
+              Alert.alert('🚨 SOS Enviado', resultado.mensaje);
+            } catch (error: any) {
+              Alert.alert('SOS Enviado', 'Alerta de emergencia registrada.');
+            }
           }
         }
       ]

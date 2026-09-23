@@ -1,17 +1,49 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ColoresTema } from '../constants/ColoresTema';
+import { apiLogin, apiRegister } from '../services/api';
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Al iniciar sesión, mandamos al usuario a la pantalla principal
-    router.replace('/(tabs)' as any);
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Campos requeridos', 'Por favor ingresa tu correo y contraseña.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await apiLogin(email.trim(), password);
+      router.replace('/(tabs)' as any);
+    } catch (error: any) {
+      Alert.alert('Error de inicio de sesión', error.message || 'Correo o contraseña incorrectos.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Campos requeridos', 'Por favor ingresa tu correo y contraseña para registrarte.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await apiRegister('Nuevo Usuario', email.trim(), password);
+      Alert.alert('¡Registro exitoso!', `Bienvenido, ${data.nombre}.`);
+      router.replace('/(tabs)' as any);
+    } catch (error: any) {
+      Alert.alert('Error de registro', error.message || 'No se pudo completar el registro.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,6 +61,9 @@ export default function LoginScreen() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          placeholder="juan@email.com"
+          placeholderTextColor="#999"
+          editable={!loading}
         />
 
         <Text style={styles.inputLabel}>INGRESE CONTRASEÑA:</Text>
@@ -37,14 +72,21 @@ export default function LoginScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          placeholder="••••••"
+          placeholderTextColor="#999"
+          editable={!loading}
         />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
           <Text style={styles.buttonText}>REGISTRARSE</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>INICIAR SESION</Text>
+        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.buttonText}>INICIAR SESION</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
