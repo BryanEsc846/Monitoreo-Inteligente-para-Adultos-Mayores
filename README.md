@@ -1,56 +1,30 @@
-# Welcome to your Expo app 👋
+# 🏥 Vitalia - Monitoreo Inteligente para Adultos Mayores
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Sistema integral de salud IoT y monitoreo biométrico en tiempo real para adultos mayores, desarrollado para la cátedra de **Diseño y Programación de Software Multiplataforma (DPS104)**.
 
-## Get started
+---
 
-1. Install dependencies
+## 👥 Equipo de Desarrollo
 
-   ```bash
-   npm install
-   ```
+* **Iliana Guadalupe Granados Hernández** (GH192121) — Líder de Proyecto
+* **Bryan David Escalante Vanegas** (EV220676) — Frontend React Native
+* **Miguel Ignacio Peña Ayala** (PA230856) — Backend & UI Support
+* **Romeo Vladimir Martínez Pérez** (MP222850) — DevOps & Infraestructura
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## 🚀 Guía Rápida para el Equipo
 
-In the output, you'll find options to open the app in a
+Para instrucciones detalladas paso a paso sobre cómo levantar la base de datos, el backend y la app en PC o Android, consulta el archivo:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+👉 **[INSTRUCCIONES_EQUIPO.md](./INSTRUCCIONES_EQUIPO.md)**
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 🏗️ Stack Tecnológico
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+* **Frontend:** React Native (Expo SDK 57), Expo Router, TypeScript
+* **Backend:** Python 3.11+, FastAPI, SQLAlchemy 2.0, Uvicorn, Bcrypt, PyJWT
+* **Base de Datos:** PostgreSQL en Docker
+* **IoT Hardware Emulado:** Smartwatch Vitalia (código `VTL-101`) con telemetría de ritmo cardíaco, detección de caídas y botón de pánico
+* **Multiplataforma:** Web (PC / Escritorio) y Móvil (Android)
