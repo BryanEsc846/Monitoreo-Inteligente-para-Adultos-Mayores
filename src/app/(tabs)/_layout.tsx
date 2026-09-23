@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ColoresTema } from '../../constants/ColoresTema';
@@ -17,6 +18,14 @@ export default function TabsLayout() {
           height: 65,
           paddingBottom: 8,
           paddingTop: 8,
+          ...(Platform.OS === 'web' ? {
+            width: '100%',
+            maxWidth: 680,
+            alignSelf: 'center',
+            left: 0,
+            right: 0,
+            marginHorizontal: 'auto',
+          } : {})
         },
         tabBarLabelStyle: {
           fontSize: 11,
