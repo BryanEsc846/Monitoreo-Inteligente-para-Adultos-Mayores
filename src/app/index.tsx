@@ -35,7 +35,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: ColoresTema.background,
+    backgroundColor: 'white',
   },
   container: {
     flex: 1,
@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     color: ColoresTema.textTitle,
     marginBottom: 30,
   },
+
   loader: {
     marginTop: 20,
   },

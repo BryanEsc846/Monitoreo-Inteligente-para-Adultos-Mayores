@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: vitalia-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: miguel
+      POSTGRES_PASSWORD: belen2duo
+      POSTGRES_DB: vitalia
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vitalia-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+psycopg://miguel:belen2duo@postgres:5432/vitalia
+      - SECRET_KEY=vitalia_super_secret_dps104_key_2026
+      - PORT=8000
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
