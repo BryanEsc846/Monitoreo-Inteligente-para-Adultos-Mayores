@@ -6,7 +6,7 @@ import { onValue, ref } from 'firebase/database';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusCard } from '../components/TarjetaEstadoPaciente';
+import { WatchStatusCard } from '../components/TarjetaEstadoPaciente';
 import { ColoresTema } from '../constants/ColoresTema';
 import { realtimeDatabase } from '../constants/firebase';
 import type { WatchData } from '../types/WatchData';
@@ -143,7 +143,7 @@ export default function PantallaMenuPrincipal() {
         )}
 
         {watchId && !watchData && <ActivityIndicator color={ColoresTema.buttonSecondary} style={styles.waiting} />}
-        <StatusCard data={watchData} />
+        <WatchStatusCard data={watchData} />
 
         {/* Botón para salir (Solo para probar la navegación) */}
         <TouchableOpacity 
