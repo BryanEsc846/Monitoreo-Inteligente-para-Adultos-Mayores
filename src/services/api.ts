@@ -1,4 +1,7 @@
+import * as Device from 'expo-device';
 import { Platform } from 'react-native';
+
+const DEVICE_API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.11:8000';
 
 // Configuración de la URL del backend
 // En Android Emulator: 10.0.2.2 apunta a localhost del host
@@ -9,11 +12,9 @@ const getBaseUrl = (): string => {
     return 'http://localhost:8000';
   }
   if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:8000';
+    return Device.isDevice ? DEVICE_API_URL : 'http://10.0.2.2:8000';
   }
-  // iOS Simulator o dispositivo físico: usar IP local de tu PC
-  // Cambiar esta IP por la de tu computadora en la red WiFi
-  return 'http://192.168.1.100:8000';
+  return DEVICE_API_URL;
 };
 
 export const API_BASE_URL = getBaseUrl();
