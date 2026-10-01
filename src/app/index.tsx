@@ -1,16 +1,15 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ColoresTema } from '../constants/ColoresTema';
 
 export default function SplashScreen() {
   const router = useRouter();
+  const [logoCargado, setLogoCargado] = useState(false);
 
   useEffect(() => {
-    // Simulamos un tiempo de carga del Splash Screen de 2 segundos
     const timer = setTimeout(() => {
-      // Redirigimos al Login
       router.replace('/login' as any);
     }, 2000);
 
@@ -19,8 +18,13 @@ export default function SplashScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>VitalGuard</Text>
+      <View style={[styles.container, { opacity: logoCargado ? 1 : 0 }]}>
+        <Image
+          source={require('../../assets/images/vitalia_logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+          onLoad={() => setLogoCargado(true)}
+        />
         <Text style={styles.subtitle}>Cuidando a los que amas</Text>
         <ActivityIndicator size="large" color={ColoresTema.buttonSecondary} style={styles.loader} />
       </View>
@@ -38,10 +42,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: ColoresTema.buttonSecondary,
+  logo: {
+    width: 300,
+    height: 300,
     marginBottom: 10,
   },
   subtitle: {
@@ -51,5 +54,5 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 20,
-  }
+  },
 });
