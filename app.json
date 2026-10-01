@@ -26,6 +26,14 @@
     "plugins": [
       "expo-router",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Permitir a Vitalia escanear el QR del reloj",
+          "recordAudioAndroid": false
+        }
+      ],
+      "expo-notifications",
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",

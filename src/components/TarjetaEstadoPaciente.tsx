@@ -1,43 +1,38 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { ColoresTema } from '../constants/ColoresTema';
+import type { WatchData } from '../types/WatchData';
 
-export function StatusCard() {
+type Props = {
+  data: WatchData | null;
+};
+
+export function StatusCard({ data }: Props) {
   return (
     <View style={styles.card}>
-      <Text style={styles.greeting}>Hola, Bryam</Text>
-      <Text style={styles.patientName}>Adulto mayor:{"\n"}María López</Text>
-
       <View style={styles.statusList}>
-        <View style={styles.statusRow}>
-          <Text style={styles.icon}>🟢</Text>
-          <View>
-            <Text style={styles.statusLabel}>Estado</Text>
-            <Text style={styles.statusValue}>Todo normal</Text>
-          </View>
-        </View>
-
         <View style={styles.statusRow}>
           <Text style={styles.icon}>❤️</Text>
           <View>
             <Text style={styles.statusLabel}>Frecuencia cardíaca</Text>
-            <Text style={styles.statusValue}>74 bpm</Text>
+            <Text style={styles.statusValue}>{data ? `${data.frecuenciaCardiaca} bpm` : '-- bpm'}</Text>
           </View>
         </View>
 
         <View style={styles.statusRow}>
-          <Text style={styles.icon}>🚶</Text>
+          <Text style={styles.icon}>🔋</Text>
           <View>
-            <Text style={styles.statusLabel}>Movimiento</Text>
-            <Text style={styles.statusValue}>Normal</Text>
+            <Text style={styles.statusLabel}>Batería del reloj</Text>
+            <Text style={styles.statusValue}>{data ? `${data.bateria}%` : '--%'}</Text>
           </View>
         </View>
 
         <View style={styles.statusRow}>
-          <Text style={styles.icon}>📍</Text>
+          <Text style={styles.icon}>〰️</Text>
           <View>
-            <Text style={styles.statusLabel}>Ubicación</Text>
-            <Text style={styles.statusValue}>En casa</Text>
+            <Text style={styles.statusLabel}>Acelerómetro (X, Y, Z)</Text>
+            <Text style={styles.statusValue}>
+              {data ? `${data.acelerometroX.toFixed(1)}, ${data.acelerometroY.toFixed(1)}, ${data.acelerometroZ.toFixed(1)} m/s²` : '--'}
+            </Text>
           </View>
         </View>
       </View>
@@ -57,18 +52,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  greeting: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 5,
-    color: ColoresTema.textDark,
-  },
-  patientName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: ColoresTema.textDark,
   },
   statusList: { gap: 15 },
   statusRow: { flexDirection: 'row', alignItems: 'center' },
