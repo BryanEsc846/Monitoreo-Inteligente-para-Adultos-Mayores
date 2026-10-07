@@ -1,9 +1,20 @@
 export type WatchData = {
+  adultoMayor?: string;
+  estado?: string;
   frecuenciaCardiaca: number;
   acelerometroX: number;
   acelerometroY: number;
   acelerometroZ: number;
   caidaDetectada: boolean;
   bateria: number;
+  ubicacionReal?: boolean;
+  ubicacionTimestamp?: number;
+  movimiento?: string;
+  ubicacion?: string;
+  latitud?: number;
+  longitud?: number;
+  caidas?: number;
+  alertasLeves?: number;
+  horasActivas?: number;
   timestamp: number;
 };

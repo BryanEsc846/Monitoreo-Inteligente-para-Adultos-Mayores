@@ -1,92 +1,75 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ColoresTema } from '../constants/ColoresTema';
-import { apiLogin, apiRegister } from '../services/api';
+import { DEMO_PASSWORD, DEMO_USER_NAME_KEY } from '../constants/demoSession';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [nombre, setNombre] = useState('');
+  const [contrasena, setContrasena] = useState('');
+  const [guardando, setGuardando] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Campos requeridos', 'Por favor ingresa tu correo y contraseña.');
+  useEffect(() => {
+    void AsyncStorage.getItem(DEMO_USER_NAME_KEY)
+      .then(savedName => { if (savedName) setNombre(savedName); })
+      .catch(error => console.warn('No se pudo cargar el nombre local', error));
+  }, []);
+
+  const ingresar = async () => {
+    const normalizedName = nombre.trim();
+    if (!normalizedName) {
+      Alert.alert('Falta el nombre', 'Escribe tu nombre para continuar.');
+      return;
+    }
+    if (contrasena !== DEMO_PASSWORD) {
+      Alert.alert('Contraseña incorrecta', 'Revisa la contraseña de demostración.');
       return;
     }
 
-    setLoading(true);
+    setGuardando(true);
     try {
-      const data = await apiLogin(email.trim(), password);
+      await AsyncStorage.setItem(DEMO_USER_NAME_KEY, normalizedName);
       router.replace('/(tabs)' as any);
-    } catch (error: any) {
-      Alert.alert('Error de inicio de sesión', error.message || 'Correo o contraseña incorrectos.');
+    } catch {
+      Alert.alert('No se pudo guardar', 'Intenta de nuevo.');
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRegister = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Campos requeridos', 'Por favor ingresa tu correo y contraseña para registrarte.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const data = await apiRegister('Nuevo Usuario', email.trim(), password);
-      Alert.alert('¡Registro exitoso!', `Bienvenido, ${data.nombre}.`);
-      router.replace('/(tabs)' as any);
-    } catch (error: any) {
-      Alert.alert('Error de registro', error.message || 'No se pudo completar el registro.');
-    } finally {
-      setLoading(false);
+      setGuardando(false);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>BIENVENIDOS</Text>
-        <Text style={styles.subtitle}>MONITOREO DE ADULTOS MAYORES</Text>
-
-        <Text style={styles.label}>INICIO DE SESION</Text>
-
-        <Text style={styles.inputLabel}>INGRESE CORREO ELECTRONICO:</Text>
+        <Text style={styles.title}>VITALIA</Text>
+        <Text style={styles.subtitle}>Monitoreo de adultos mayores</Text>
+        <Text style={styles.label}>Nombre del cuidador</Text>
         <TextInput
           style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholder="juan@email.com"
-          placeholderTextColor="#999"
-          editable={!loading}
+          value={nombre}
+          onChangeText={setNombre}
+          placeholder="Tu nombre"
+          placeholderTextColor={ColoresTema.textMuted}
+          autoCapitalize="words"
+          editable={!guardando}
+          returnKeyType="next"
         />
-
-        <Text style={styles.inputLabel}>INGRESE CONTRASEÑA:</Text>
+        <Text style={styles.label}>Contraseña de demostración</Text>
         <TextInput
           style={styles.input}
-          value={password}
-          onChangeText={setPassword}
+          value={contrasena}
+          onChangeText={setContrasena}
+          placeholder="Contraseña"
+          placeholderTextColor={ColoresTema.textMuted}
           secureTextEntry
-          placeholder="••••••"
-          placeholderTextColor="#999"
-          editable={!loading}
+          editable={!guardando}
+          onSubmitEditing={() => void ingresar()}
         />
-
-        <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-          <Text style={styles.buttonText}>REGISTRARSE</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.buttonText}>INICIAR SESION</Text>
-          )}
+        <Text style={styles.hint}>Clave fija para esta demo: {DEMO_PASSWORD}</Text>
+        <TouchableOpacity style={styles.button} onPress={() => void ingresar()} disabled={guardando}>
+          {guardando ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>Continuar</Text>}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -94,65 +77,13 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: ColoresTema.background,
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 30,
-    width: '100%',
-    maxWidth: 420,
-    alignSelf: 'center',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: ColoresTema.textTitle,
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: ColoresTema.textTitle,
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: ColoresTema.textTitle,
-  },
-  inputLabel: {
-    fontSize: 12,
-    alignSelf: 'flex-start',
-    marginBottom: 5,
-    marginLeft: 10,
-    fontWeight: '600',
-    color: ColoresTema.textTitle,
-  },
-  input: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 25,
-    height: 40,
-    paddingHorizontal: 15,
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: ColoresTema.buttonSecondary,
-    width: '100%',
-    height: 45,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-  }
+  safeArea: { flex: 1, backgroundColor: ColoresTema.background },
+  container: { flex: 1, justifyContent: 'center', padding: 28, width: '100%', maxWidth: 440, alignSelf: 'center' },
+  title: { color: ColoresTema.primary, fontSize: 30, fontWeight: '800', textAlign: 'center' },
+  subtitle: { color: ColoresTema.textMuted, fontSize: 15, textAlign: 'center', marginTop: 6, marginBottom: 36 },
+  label: { color: ColoresTema.textTitle, fontSize: 14, fontWeight: '600', marginBottom: 7 },
+  input: { backgroundColor: '#FFFFFF', borderColor: ColoresTema.border, borderWidth: 1, borderRadius: 10, minHeight: 48, paddingHorizontal: 14, marginBottom: 20, color: ColoresTema.textDark },
+  hint: { color: ColoresTema.textMuted, fontSize: 12, marginTop: -12, marginBottom: 20 },
+  button: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: ColoresTema.buttonSecondary },
+  buttonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
 });

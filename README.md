@@ -15,7 +15,7 @@ Sistema integral de salud IoT y monitoreo biométrico en tiempo real para adulto
 
 ## 🚀 Guía Rápida para el Equipo
 
-Para instrucciones detalladas paso a paso sobre cómo levantar la base de datos, el backend y la app en PC o Android, consulta el archivo:
+La app de demostración usa un login local, sin backend ni Docker. El nombre del cuidador se guarda en el teléfono y las lecturas del reloj llegan por Firebase después de vincularlo con QR. Para instrucciones y limitaciones, consulta:
 
 👉 **[INSTRUCCIONES_EQUIPO.md](./INSTRUCCIONES_EQUIPO.md)**
 
@@ -24,7 +24,9 @@ Para instrucciones detalladas paso a paso sobre cómo levantar la base de datos,
 ## 🏗️ Stack Tecnológico
 
 * **Frontend:** React Native (Expo SDK 57), Expo Router, TypeScript
-* **Backend:** Python 3.11+, FastAPI, SQLAlchemy 2.0, Uvicorn, Bcrypt, PyJWT
-* **Base de Datos:** PostgreSQL en Docker
+* **Datos de cuidador demo:** nombre almacenado localmente; contraseña fija de demostración
+* **Datos del reloj:** Firebase Realtime Database después de vincular el QR
+* **Backend opcional:** Python 3.11+, FastAPI, SQLAlchemy 2.0, Uvicorn, Bcrypt, PyJWT
+* **Base de Datos opcional:** PostgreSQL en Docker para desarrollo del backend legado
 * **IoT Hardware Emulado:** Smartwatch Vitalia (código `VTL-101`) con telemetría de ritmo cardíaco, detección de caídas y botón de pánico
 * **Multiplataforma:** Web (PC / Escritorio) y Móvil (Android)

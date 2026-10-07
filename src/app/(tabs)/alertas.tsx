@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { ColoresTema } from '../../constants/ColoresTema';
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { TarjetaAlertaItem } from '../../components/TarjetaAlertaItem';
-import { apiGetAlertas, apiResolverAlerta, AlertaItem } from '../../services/api';
+import { ColoresTema } from '../../constants/ColoresTema';
+import { AlertaItem, apiGetAlertas, apiResolverAlerta } from '../../services/api';
 
 export default function AlertasScreen() {
   const [alertas, setAlertas] = useState<AlertaItem[]>([]);
@@ -37,7 +37,7 @@ export default function AlertasScreen() {
       await apiResolverAlerta(alertaId);
       Alert.alert('Alerta resuelta', 'La alerta ha sido marcada como atendida.');
       await cargarAlertas();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'No se pudo resolver la alerta.');
     }
   };

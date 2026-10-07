@@ -1,5 +1,5 @@
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ColoresTema } from '../constants/ColoresTema';
 import type { SignosVitales } from '../services/api';
 import type { WatchData } from '../types/WatchData';
@@ -10,6 +10,10 @@ interface StatusCardProps {
   nombre?: string;
   iniciales?: string;
   estadoTexto?: string;
+  coordenadas?: string;
+  gpsActualizado?: string;
+  latitud?: number;
+  longitud?: number;
 }
 
 export function StatusCard({
@@ -18,21 +22,35 @@ export function StatusCard({
   nombre = 'María López',
   iniciales = 'ML',
   estadoTexto = 'Estable',
+  coordenadas,
+  gpsActualizado,
+  latitud,
+  longitud,
 }: StatusCardProps) {
 
-  // Usar datos reales del backend o fallback
-  const ritmo = signosVitales?.ritmoCardiaco?.valor ?? 74;
-  const movimiento = signosVitales?.movimiento?.valor ?? 'Normal';
-  const ubicacion = signosVitales?.ubicacion?.valor ?? 'En Casa';
-  const bateria = signosVitales?.bateria?.valor ?? 85;
+  const ritmo = signosVitales?.ritmoCardiaco?.valor ?? '--';
+  const movimiento = signosVitales?.movimiento?.valor ?? '--';
+  const ubicacion = signosVitales?.ubicacion?.valor ?? '--';
+  const bateria = signosVitales?.bateria?.valor ?? '--';
 
-  const ritmoEstado = signosVitales?.ritmoCardiaco?.estado ?? 'normal';
-  const movEstado = signosVitales?.movimiento?.estado ?? 'normal';
-  const ubiEstado = signosVitales?.ubicacion?.estado ?? 'normal';
-  const batEstado = signosVitales?.bateria?.estado ?? 'normal';
+  const ritmoEstado = signosVitales?.ritmoCardiaco?.estado ?? 'unknown';
+  const movEstado = signosVitales?.movimiento?.estado ?? 'unknown';
+  const ubiEstado = signosVitales?.ubicacion?.estado ?? 'unknown';
+  const batEstado = signosVitales?.bateria?.estado ?? 'unknown';
 
   const estadoColor = estadoTexto === 'Estable' ? ColoresTema.success :
     estadoTexto === 'Crítico' ? '#DC2626' : '#F59E0B';
+
+  const verUbicacion = () => {
+    if (typeof latitud !== 'number' || typeof longitud !== 'number') {
+      Alert.alert('Ubicación no disponible', 'El reloj todavía no ha enviado coordenadas reales.');
+      return;
+    }
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitud},${longitud}`;
+    void Linking.openURL(url).catch(() =>
+      Alert.alert('No se pudo abrir el mapa', `${latitud.toFixed(5)}, ${longitud.toFixed(5)}`)
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -71,13 +89,21 @@ export function StatusCard({
           <Text style={styles.gridLabel}>Movimiento</Text>
         </View>
 
-        <View style={[styles.gridItem, ubiEstado === 'warning' && styles.gridItemWarning]}>
+        <TouchableOpacity
+          style={[styles.gridItem, ubiEstado === 'warning' && styles.gridItemWarning]}
+          onPress={verUbicacion}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Ver ubicación del paciente en el mapa"
+        >
           <View style={[styles.iconBox, { backgroundColor: ubiEstado === 'warning' ? '#FEF3C7' : '#D1FAE5' }]}>
             <Ionicons name="location-sharp" size={18} color={ubiEstado === 'warning' ? '#F59E0B' : ColoresTema.success} />
           </View>
-          <Text style={styles.gridValue}>{ubicacion}</Text>
+          <Text style={styles.gridValue} numberOfLines={2}>{ubicacion}</Text>
+          {coordenadas ? <Text style={styles.gridCoordinates}>{coordenadas}</Text> : null}
+          {gpsActualizado ? <Text style={styles.gridCoordinates}>Última lectura: {gpsActualizado}</Text> : null}
           <Text style={styles.gridLabel}>Ubicación</Text>
-        </View>
+        </TouchableOpacity>
 
         {/* Tarjeta 4: Batería */}
         <View style={[styles.gridItem, batEstado === 'warning' && styles.gridItemWarning]}>
@@ -247,6 +273,11 @@ const styles = StyleSheet.create({
   gridLabel: {
     fontSize: 12,
     color: ColoresTema.textMuted,
+  },
+  gridCoordinates: {
+    fontSize: 10,
+    color: ColoresTema.textMuted,
+    marginBottom: 4,
   },
   watchCard: {
     width: '100%',

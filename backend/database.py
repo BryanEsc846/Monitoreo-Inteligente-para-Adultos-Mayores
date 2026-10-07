@@ -5,10 +5,9 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg://miguel:belen2duo@localhost:5432/vitalia"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL must be set before starting the backend")
 
 # Configuración del motor SQLAlchemy
 engine = create_engine(

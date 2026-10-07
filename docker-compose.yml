@@ -4,13 +4,32 @@ services:
     container_name: vitalia-postgres
     restart: always
     environment:
-      POSTGRES_USER: miguel
-      POSTGRES_PASSWORD: belen2duo
-      POSTGRES_DB: vitalia
+      POSTGRES_USER: "${POSTGRES_USER:?Define POSTGRES_USER in .env}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD in .env}"
+      POSTGRES_DB: "${POSTGRES_DB:?Define POSTGRES_DB in .env}"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-init:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vitalia-db-init
+    command: ["python", "seed.py"]
+    restart: "no"
+    environment:
+      DATABASE_URL: "postgresql+psycopg://${POSTGRES_USER:?Define POSTGRES_USER in .env}:${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:?Define POSTGRES_DB in .env}"
+      SECRET_KEY: "${SECRET_KEY:?Define SECRET_KEY in .env}"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   backend:
     build:
@@ -21,11 +40,12 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+psycopg://miguel:belen2duo@postgres:5432/vitalia
-      - SECRET_KEY=vitalia_super_secret_dps104_key_2026
-      - PORT=8000
+      DATABASE_URL: "postgresql+psycopg://${POSTGRES_USER:?Define POSTGRES_USER in .env}:${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:?Define POSTGRES_DB in .env}"
+      SECRET_KEY: "${SECRET_KEY:?Define SECRET_KEY in .env}"
+      PORT: "8000"
     depends_on:
-      - postgres
+      db-init:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:

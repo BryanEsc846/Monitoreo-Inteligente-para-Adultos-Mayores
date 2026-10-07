@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ColoresTema } from '../constants/ColoresTema';
 
 export function WeeklyReport({ compact = false }: { compact?: boolean }) {
@@ -23,16 +22,6 @@ export function WeeklyReport({ compact = false }: { compact?: boolean }) {
           </View>
         </View>
 
-        {/* Barra 2 */}
-        <View style={styles.barWrapper}>
-          <View style={styles.labelRow}>
-            <Text style={styles.chartLabel}>Nivel de actividad</Text>
-            <Text style={styles.chartValue}>Moderado</Text>
-          </View>
-          <View style={styles.barTrack}>
-            <View style={[styles.barFill, { width: '50%', backgroundColor: ColoresTema.primary }]} />
-          </View>
-        </View>
       </View>
 
       {!compact && (

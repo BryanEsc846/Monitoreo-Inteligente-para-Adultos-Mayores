@@ -1,84 +1,43 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
-import { onValue, ref } from 'firebase/database';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WatchStatusCard } from '../components/TarjetaEstadoPaciente';
 import { ColoresTema } from '../constants/ColoresTema';
-import { realtimeDatabase } from '../constants/firebase';
+import { useWatchData } from '../hooks/useWatchData';
 import type { WatchData } from '../types/WatchData';
 
-const WATCH_ID_STORAGE_KEY = 'vitalia.watchId';
 const LIMITE_PULSO_ALTO_BPM = 110;
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
-
-async function enviarAlarma(title: string, body: string) {
-  await Notifications.scheduleNotificationAsync({
-    content: { title, body, sound: 'default', ...(Platform.OS === 'android' ? { channelId: 'alarms' } : {}) },
-    trigger: null,
-  });
+function enviarAlarma(title: string, body: string) {
+  Alert.alert(title, body);
 }
 
 export default function PantallaMenuPrincipal() {
   const router = useRouter();
-  const [watchId, setWatchId] = useState<string | null>(null);
-  const [watchData, setWatchData] = useState<WatchData | null>(null);
+  const { watchId, watchData, patientName, fallbackPatientName, linkWatch, unlinkWatch, saveFallbackPatientName } = useWatchData();
   const [scanning, setScanning] = useState(false);
+  const [nombrePacienteInput, setNombrePacienteInput] = useState('');
   const [permission, requestPermission] = useCameraPermissions();
   const scannedRef = useRef(false);
   const lastAlarmDataRef = useRef<WatchData | null>(null);
 
   useEffect(() => {
-    const prepararNotificaciones = async () => {
-      if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('alarms', {
-          name: 'Alarmas de monitoreo',
-          importance: Notifications.AndroidImportance.MAX,
-          sound: 'default',
-          vibrationPattern: [0, 400, 200, 400],
-        });
-      }
-      const current = await Notifications.getPermissionsAsync();
-      if (!current.granted) await Notifications.requestPermissionsAsync();
-    };
-    void prepararNotificaciones().catch(error => console.warn('No se pudieron activar las alarmas', error));
-  }, []);
-
-  useEffect(() => {
-    AsyncStorage.getItem(WATCH_ID_STORAGE_KEY).then(setWatchId);
-  }, []);
-
-  useEffect(() => {
-    if (!watchId) {
-      setWatchData(null);
+    if (!watchData) {
       lastAlarmDataRef.current = null;
       return;
     }
-    return onValue(ref(realtimeDatabase, `devices/${watchId}/latest`), snapshot => {
-      const nextData = snapshot.exists() ? snapshot.val() as WatchData : null;
-      const previousData = lastAlarmDataRef.current;
-      if (nextData?.caidaDetectada && !previousData?.caidaDetectada) {
-        void enviarAlarma('Alarma: posible caída', 'El acelerómetro del reloj detectó un impacto fuerte.').catch(console.warn);
-      }
-      if (nextData && nextData.frecuenciaCardiaca > LIMITE_PULSO_ALTO_BPM &&
-          (!previousData || previousData.frecuenciaCardiaca <= LIMITE_PULSO_ALTO_BPM)) {
-        void enviarAlarma('Alarma: pulso elevado', `Se detectaron ${nextData.frecuenciaCardiaca} pulsaciones por minuto.`).catch(console.warn);
-      }
-      lastAlarmDataRef.current = nextData;
-      setWatchData(nextData);
-    });
-  }, [watchId]);
+    const previousData = lastAlarmDataRef.current;
+    if (watchData.caidaDetectada && !previousData?.caidaDetectada) {
+      enviarAlarma('Alarma: posible caída', 'El acelerómetro del reloj detectó un impacto fuerte.');
+    }
+    if (watchData.frecuenciaCardiaca > LIMITE_PULSO_ALTO_BPM &&
+        (!previousData || previousData.frecuenciaCardiaca <= LIMITE_PULSO_ALTO_BPM)) {
+      enviarAlarma('Alarma: pulso elevado', `Se detectaron ${watchData.frecuenciaCardiaca} pulsaciones por minuto.`);
+    }
+    lastAlarmDataRef.current = watchData;
+  }, [watchData]);
 
   const iniciarEscaneo = async () => {
     if (!permission?.granted) {
@@ -94,15 +53,18 @@ export default function PantallaMenuPrincipal() {
     if (!match || scannedRef.current) return;
     scannedRef.current = true;
     const id = match[1];
-    await AsyncStorage.setItem(WATCH_ID_STORAGE_KEY, id);
-    setWatchId(id);
+    await linkWatch(id);
     setScanning(false);
   };
 
   const desvincular = async () => {
-    await AsyncStorage.removeItem(WATCH_ID_STORAGE_KEY);
-    setWatchId(null);
-    setWatchData(null);
+    await unlinkWatch();
+    setNombrePacienteInput('');
+  };
+
+  const guardarNombrePaciente = async () => {
+    await saveFallbackPatientName(nombrePacienteInput);
+    setNombrePacienteInput('');
   };
 
   return (
@@ -115,7 +77,7 @@ export default function PantallaMenuPrincipal() {
         <View style={styles.connectionRow}>
           <View style={styles.connectionState}>
             <View style={[styles.connectionDot, watchData ? styles.connectedDot : styles.disconnectedDot]} />
-            <Text style={styles.connectionText}>{watchData ? 'Reloj conectado' : watchId ? 'Esperando datos' : 'Sin reloj vinculado'}</Text>
+            <Text style={styles.connectionText}>{watchData ? `Reloj conectado${patientName ? ` · ${patientName}` : ''}` : watchId ? 'Esperando datos' : 'Sin reloj vinculado'}</Text>
           </View>
           {watchId ? (
             <TouchableOpacity onPress={desvincular} accessibilityLabel="Desvincular reloj">
@@ -143,14 +105,30 @@ export default function PantallaMenuPrincipal() {
         )}
 
         {watchId && !watchData && <ActivityIndicator color={ColoresTema.buttonSecondary} style={styles.waiting} />}
+        {watchId && watchData && !watchData.adultoMayor?.trim() && !fallbackPatientName && (
+          <View style={styles.patientNameForm}>
+            <Text style={styles.scannerTitle}>El reloj no envía el nombre del adulto mayor</Text>
+            <TextInput
+              style={styles.patientNameInput}
+              value={nombrePacienteInput}
+              onChangeText={setNombrePacienteInput}
+              placeholder="Nombre del adulto mayor"
+              placeholderTextColor={ColoresTema.textMuted}
+              autoCapitalize="words"
+            />
+            <TouchableOpacity style={styles.saveNameButton} onPress={() => void guardarNombrePaciente()}>
+              <Text style={styles.saveNameButtonText}>Guardar nombre</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         <WatchStatusCard data={watchData} />
 
-        {/* Botón para salir (Solo para probar la navegación) */}
+        {/* Regresa al dashboard de la demo. */}
         <TouchableOpacity 
           style={styles.logoutButton}
-          onPress={() => router.replace('/login' as any)}
+          onPress={() => router.replace('/(tabs)' as any)}
         >
-          <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
+          <Text style={styles.logoutButtonText}>Volver al inicio</Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -194,6 +172,10 @@ const styles = StyleSheet.create({
   camera: { width: '100%', height: 250, overflow: 'hidden', borderRadius: 8 },
   cancelScan: { padding: 10 },
   waiting: { marginBottom: 12 },
+  patientNameForm: { width: '100%', marginBottom: 16 },
+  patientNameInput: { width: '100%', minHeight: 44, borderWidth: 1, borderColor: ColoresTema.border, backgroundColor: '#FFFFFF', borderRadius: 8, paddingHorizontal: 12, color: ColoresTema.textDark },
+  saveNameButton: { alignItems: 'center', padding: 11, marginTop: 8, backgroundColor: ColoresTema.buttonSecondary, borderRadius: 8 },
+  saveNameButtonText: { color: '#FFFFFF', fontWeight: '700' },
   logoutButton: {
     paddingVertical: 10,
     paddingHorizontal: 40,

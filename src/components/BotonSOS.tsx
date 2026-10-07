@@ -1,5 +1,4 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { ColoresTema } from '../constants/ColoresTema';
 import { apiEnviarSOS } from '../services/api';
 
@@ -11,19 +10,15 @@ export function BotonSOS({ pacienteId = 1 }: BotonSOSProps) {
   const handlePress = () => {
     Alert.alert(
       '¿Enviar alerta de emergencia?',
-      'Se notificará a todos los contactos de emergencia',
+      'Se agregará una alerta local de demostración. No se notificará a contactos reales.',
       [
         { text: 'Cancelar', style: 'cancel' },
         { 
           text: 'Enviar SOS', 
           style: 'destructive',
           onPress: async () => {
-            try {
-              const resultado = await apiEnviarSOS(pacienteId);
-              Alert.alert('🚨 SOS Enviado', resultado.mensaje);
-            } catch (error: any) {
-              Alert.alert('SOS Enviado', 'Alerta de emergencia registrada.');
-            }
+            const resultado = await apiEnviarSOS(pacienteId);
+            Alert.alert('SOS registrado (demo)', resultado.mensaje);
           }
         }
       ]
