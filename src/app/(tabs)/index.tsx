@@ -80,12 +80,12 @@ export default function HomeScreen() {
           <BotonSOS pacienteId={pacienteId} />
         </View>
 
-        {!watchId && (
-          <TouchableOpacity style={styles.pairButton} onPress={() => router.push('/MenuPrincipal' as any)}>
-            <Ionicons name="qr-code-outline" size={20} color={ColoresTema.primary} />
-            <Text style={styles.pairButtonText}>Vincular reloj con QR</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity style={styles.pairButton} onPress={() => router.push('/MenuPrincipal' as any)}>
+          <Ionicons name={watchId ? 'watch-outline' : 'qr-code-outline'} size={20} color={ColoresTema.primary} />
+          <Text style={styles.pairButtonText}>
+            {watchId ? 'Gestionar reloj vinculado' : 'Vincular reloj con QR'}
+          </Text>
+        </TouchableOpacity>
 
         {/* 3. Patient Status Card - telemetría Firebase */}
         <StatusCard

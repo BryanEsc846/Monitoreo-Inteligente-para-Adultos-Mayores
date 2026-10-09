@@ -58,8 +58,26 @@ export default function PantallaMenuPrincipal() {
   };
 
   const desvincular = async () => {
-    await unlinkWatch();
-    setNombrePacienteInput('');
+    try {
+      await unlinkWatch();
+      setNombrePacienteInput('');
+      setScanning(false);
+      scannedRef.current = false;
+    } catch (error) {
+      console.warn('No se pudo borrar la vinculación del reloj', error);
+      Alert.alert('Error', 'No se pudo borrar la vinculación del reloj. Inténtalo de nuevo.');
+    }
+  };
+
+  const confirmarDesvinculacion = () => {
+    Alert.alert(
+      'Desvincular reloj',
+      'Se eliminará el QR guardado y los datos locales asociados a los relojes vinculados.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Desvincular', style: 'destructive', onPress: () => void desvincular() },
+      ]
+    );
   };
 
   const guardarNombrePaciente = async () => {
@@ -79,11 +97,7 @@ export default function PantallaMenuPrincipal() {
             <View style={[styles.connectionDot, watchData ? styles.connectedDot : styles.disconnectedDot]} />
             <Text style={styles.connectionText}>{watchData ? `Reloj conectado${patientName ? ` · ${patientName}` : ''}` : watchId ? 'Esperando datos' : 'Sin reloj vinculado'}</Text>
           </View>
-          {watchId ? (
-            <TouchableOpacity onPress={desvincular} accessibilityLabel="Desvincular reloj">
-              <Text style={styles.linkAction}>Desvincular</Text>
-            </TouchableOpacity>
-          ) : (
+          {!watchId && (
             <TouchableOpacity onPress={iniciarEscaneo} accessibilityLabel="Escanear QR del reloj">
               <Text style={styles.linkAction}>Escanear QR</Text>
             </TouchableOpacity>
@@ -121,6 +135,13 @@ export default function PantallaMenuPrincipal() {
             </TouchableOpacity>
           </View>
         )}
+
+        {watchId && (
+          <TouchableOpacity style={styles.clearQrButton} onPress={confirmarDesvinculacion} accessibilityLabel="Desvincular reloj y borrar QR">
+            <Text style={styles.clearQrButtonText}>Desvincular reloj y borrar QR</Text>
+          </TouchableOpacity>
+        )}
+
         <WatchStatusCard data={watchData} />
 
         {/* Regresa al dashboard de la demo. */}
@@ -144,7 +165,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     alignItems: 'center',
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   mainTitle: {
     fontSize: 18,
@@ -176,6 +197,20 @@ const styles = StyleSheet.create({
   patientNameInput: { width: '100%', minHeight: 44, borderWidth: 1, borderColor: ColoresTema.border, backgroundColor: '#FFFFFF', borderRadius: 8, paddingHorizontal: 12, color: ColoresTema.textDark },
   saveNameButton: { alignItems: 'center', padding: 11, marginTop: 8, backgroundColor: ColoresTema.buttonSecondary, borderRadius: 8 },
   saveNameButtonText: { color: '#FFFFFF', fontWeight: '700' },
+  clearQrButton: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginBottom: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+    backgroundColor: '#FEF2F2',
+  },
+  clearQrButtonText: {
+    color: '#B91C1C',
+    fontWeight: '700',
+  },
   logoutButton: {
     paddingVertical: 10,
     paddingHorizontal: 40,

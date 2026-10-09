@@ -1,10 +1,12 @@
-import React from 'react';
-import { Platform } from 'react-native';
-import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ColoresTema } from '../../constants/ColoresTema';
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -15,8 +17,8 @@ export default function TabsLayout() {
           backgroundColor: ColoresTema.cardBackground,
           borderTopColor: ColoresTema.border,
           borderTopWidth: 1,
-          height: 65,
-          paddingBottom: 8,
+          height: 65 + insets.bottom,
+          paddingBottom: 8 + insets.bottom,
           paddingTop: 8,
           ...(Platform.OS === 'web' ? {
             width: '100%',

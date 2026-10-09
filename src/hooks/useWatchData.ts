@@ -62,12 +62,15 @@ export function useWatchData() {
   }, []);
 
   const unlinkWatch = useCallback(async () => {
-    if (watchId) await AsyncStorage.removeItem(`${PATIENT_NAME_STORAGE_KEY}${watchId}`);
-    await AsyncStorage.removeItem(WATCH_ID_STORAGE_KEY);
+    const storedKeys = await AsyncStorage.getAllKeys();
+    const watchKeys = storedKeys.filter(key =>
+      key === WATCH_ID_STORAGE_KEY || key.startsWith(PATIENT_NAME_STORAGE_KEY)
+    );
+    await AsyncStorage.multiRemove(watchKeys);
     setWatchId(null);
     setWatchData(null);
     setFallbackPatientName(null);
-  }, [watchId]);
+  }, []);
 
   const saveFallbackPatientName = useCallback(async (name: string) => {
     if (!watchId || !name.trim()) return;
