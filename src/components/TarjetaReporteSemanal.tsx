@@ -1,48 +1,79 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import type { DimensionValue } from 'react-native';
 import { ColoresTema } from '../constants/ColoresTema';
+import { apiGetAlertas, apiGetHistorial, HistorialResponse } from '../services/api';
 
-export function WeeklyReport({ compact = false }: { compact?: boolean }) {
+export function DailyReport({ compact = false }: { compact?: boolean }) {
+  const [report, setReport] = useState<HistorialResponse | null>(null);
+  const [alertCount, setAlertCount] = useState(0);
+  const cargar = useCallback(async () => {
+    const [historial, alertas] = await Promise.all([
+      apiGetHistorial(1, 'Hoy'),
+      apiGetAlertas(1),
+    ]);
+    setReport(historial);
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    setAlertCount(alertas.filter(alerta =>
+      typeof alerta.timestamp === 'number' && alerta.timestamp >= startOfDay.getTime()
+    ).length);
+  }, []);
+
+  useEffect(() => {
+    void cargar().catch(error => console.warn('No se pudo cargar el resumen diario', error));
+    const interval = setInterval(() => {
+      void cargar().catch(error => console.warn('No se pudo actualizar el resumen diario', error));
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [cargar]);
+
+  if (!report) {
+    return <ActivityIndicator color={ColoresTema.primary} />;
+  }
+
+  const promedio = report.estadisticas.promedio;
+  const fillWidth: DimensionValue = promedio
+    ? `${Math.min(Math.max((promedio / 150) * 100, 4), 100)}%`
+    : '4%';
+
   return (
     <View style={[styles.card, compact && styles.cardCompact]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Reporte Semanal</Text>
+        <Text style={styles.title}>Resumen Diario</Text>
         <Ionicons name="bar-chart" size={20} color={ColoresTema.primary} />
       </View>
 
       <View style={styles.chartContainer}>
-        {/* Barra 1 */}
         <View style={styles.barWrapper}>
           <View style={styles.labelRow}>
-            <Text style={styles.chartLabel}>Frecuencia cardíaca media</Text>
-            <Text style={styles.chartValue}>72 bpm</Text>
+            <Text style={styles.chartLabel}>Frecuencia cardíaca promedio</Text>
+            <Text style={styles.chartValue}>{promedio || '--'} bpm</Text>
           </View>
           <View style={styles.barTrack}>
-            <View style={[styles.barFill, { width: '70%', backgroundColor: ColoresTema.danger }]} />
+            <View style={[styles.barFill, { width: fillWidth, backgroundColor: ColoresTema.danger }]} />
           </View>
         </View>
-
       </View>
 
       {!compact && (
         <>
           <View style={styles.summaryBox}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryNumber}>0</Text>
-              <Text style={styles.summaryText}>Caídas</Text>
+              <Text style={styles.summaryNumber}>{report.estadisticas.maximo || '--'}</Text>
+              <Text style={styles.summaryText}>Máximo bpm</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryNumber}>2</Text>
-              <Text style={styles.summaryText}>Alertas leves</Text>
+              <Text style={styles.summaryNumber}>{alertCount}</Text>
+              <Text style={styles.summaryText}>Alertas del día</Text>
             </View>
           </View>
-
-          <TouchableOpacity style={styles.downloadButton}>
-            <Ionicons name="download-outline" size={18} color={ColoresTema.primary} />
-            <Text style={styles.downloadText}>Descargar PDF del médico</Text>
-          </TouchableOpacity>
         </>
+      )}
+      {report.puntos.length === 0 && (
+        <Text style={styles.noData}>Aún no hay mediciones registradas hoy.</Text>
       )}
     </View>
   );
@@ -131,6 +162,12 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: ColoresTema.border,
     marginHorizontal: 15,
+  },
+  noData: {
+    color: ColoresTema.textMuted,
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 8,
   },
   downloadButton: {
     flexDirection: 'row',

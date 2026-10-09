@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ColoresTema } from '../../constants/ColoresTema';
@@ -31,24 +31,20 @@ export default function HistorialScreen() {
     setRefreshing(false);
   }, [cargarHistorial]);
 
-  // Datos de la gráfica (reales o fallback)
-  const puntos = historial?.puntos || [
-    { dia: 'L', valor: 72 }, { dia: 'M', valor: 75 }, { dia: 'Mi', valor: 68 },
-    { dia: 'J', valor: 74 }, { dia: 'V', valor: 80 }, { dia: 'S', valor: 71 }, { dia: 'D', valor: 74 },
-  ];
-  const stats = historial?.estadisticas || { promedio: 73, maximo: 80, minimo: 68 };
+  const puntos = historial?.puntos || [];
+  const stats = historial?.estadisticas || { promedio: 0, maximo: 0, minimo: 0 };
 
-  const handleDescargarPDF = () => {
-    Alert.alert(
-      'Reporte PDF',
-      `Reporte de ${periodo} generado.\n\n` +
-      `Paciente: María López\n` +
-      `Promedio: ${stats.promedio} bpm\n` +
-      `Máximo: ${stats.maximo} bpm\n` +
-      `Mínimo: ${stats.minimo} bpm\n\n` +
-      `Nota: La funcionalidad completa de exportación PDF estará disponible en la versión final.`,
-      [{ text: 'Entendido' }]
-    );
+  const handleCompartirReporte = async () => {
+    await Share.share({
+      title: `Reporte de salud - ${periodo}`,
+      message: [
+        `Reporte de salud de María López (${periodo})`,
+        `Promedio: ${stats.promedio || '--'} bpm`,
+        `Máximo: ${stats.maximo || '--'} bpm`,
+        `Mínimo: ${stats.minimo || '--'} bpm`,
+        puntos.length ? `Mediciones agrupadas: ${puntos.length}` : 'Sin mediciones registradas.',
+      ].join('\n'),
+    });
   };
 
   return (
@@ -86,6 +82,9 @@ export default function HistorialScreen() {
             color={ColoresTema.danger}
             unidad="bpm"
           />
+          {puntos.length === 0 && (
+            <Text style={styles.noData}>No hay mediciones registradas para este período.</Text>
+          )}
         </View>
 
         <View style={styles.statsRow}>
@@ -103,9 +102,9 @@ export default function HistorialScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.downloadButton} onPress={handleDescargarPDF}>
-          <Ionicons name="download-outline" size={20} color={ColoresTema.primary} />
-          <Text style={styles.downloadButtonText}>Descargar reporte PDF</Text>
+        <TouchableOpacity style={styles.downloadButton} onPress={() => void handleCompartirReporte()}>
+          <Ionicons name="share-outline" size={20} color={ColoresTema.primary} />
+          <Text style={styles.downloadButtonText}>Compartir reporte</Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -220,5 +219,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  noData: {
+    color: ColoresTema.textMuted,
+    textAlign: 'center',
+    fontSize: 13,
+    marginTop: 4,
   }
 });

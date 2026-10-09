@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BotonSOS } from '../../components/BotonSOS';
 import { RecentAlerts } from '../../components/TarjetaAlertas';
 import { StatusCard } from '../../components/TarjetaEstadoPaciente';
-import { WeeklyReport } from '../../components/TarjetaReporteSemanal';
+import { DailyReport } from '../../components/TarjetaReporteSemanal';
 import { ColoresTema } from '../../constants/ColoresTema';
 import { DEMO_USER_NAME_KEY } from '../../constants/demoSession';
 import { useWatchData } from '../../hooks/useWatchData';
@@ -113,10 +113,10 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* 5. Weekly Report compact */}
+        {/* 5. Daily report compact */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Resumen del Día</Text>
-          <WeeklyReport compact={true} />
+          <DailyReport compact={true} />
           <TouchableOpacity onPress={() => router.push('/(tabs)/historial')} style={styles.linkButton}>
             <Text style={styles.linkText}>Ver reporte completo →</Text>
           </TouchableOpacity>

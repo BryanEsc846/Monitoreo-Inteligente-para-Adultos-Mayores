@@ -3,6 +3,8 @@ import { useFocusEffect } from 'expo-router';
 import { onValue, ref } from 'firebase/database';
 import { useCallback, useEffect, useState } from 'react';
 import { realtimeDatabase } from '../constants/firebase';
+import { apiCrearAlertasDesdeLectura, apiGuardarLectura } from '../services/api';
+import { enviarNotificacionAlerta } from '../services/notifications';
 import type { WatchData } from '../types/WatchData';
 
 const WATCH_ID_STORAGE_KEY = 'vitalia.watchId';
@@ -40,6 +42,17 @@ export function useWatchData() {
       setWatchData(null);
     });
   }, [isFocused, watchId]);
+
+  useEffect(() => {
+    if (!watchId || !watchData) return;
+    void (async () => {
+      await apiGuardarLectura(watchId, watchData);
+      const alertas = await apiCrearAlertasDesdeLectura(watchId, watchData);
+      await Promise.all(alertas.map(alerta =>
+        enviarNotificacionAlerta(alerta.titulo, alerta.descripcion)
+      ));
+    })().catch(error => console.warn('No se pudo procesar la telemetría del reloj', error));
+  }, [watchId, watchData]);
 
   useEffect(() => {
     if (!watchId) {
